@@ -8,6 +8,7 @@
 #include "HackStudio.h"
 #include "HackStudioWidget.h"
 #include "Project.h"
+#include <AK/ScopeGuard.h>
 #include <AK/StringBuilder.h>
 #include <LibConfig/Client.h>
 #include <LibCore/ArgsParser.h>
@@ -98,6 +99,9 @@ static bool make_is_available()
     posix_spawn_file_actions_t action;
     posix_spawn_file_actions_init(&action);
     posix_spawn_file_actions_addopen(&action, STDOUT_FILENO, "/dev/null", O_WRONLY, 0);
+    ScopeGuard destroy_action = [&] {
+        posix_spawn_file_actions_destroy(&action);
+    };
 
     if ((errno = posix_spawnp(&pid, "make", &action, nullptr, const_cast<char**>(argv), environ))) {
         perror("posix_spawn");
@@ -105,7 +109,6 @@ static bool make_is_available()
     }
     int wstatus;
     waitpid(pid, &wstatus, 0);
-    posix_spawn_file_actions_destroy(&action);
     return WEXITSTATUS(wstatus) == 0;
 }
 
