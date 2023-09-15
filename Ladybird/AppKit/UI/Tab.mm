@@ -221,6 +221,11 @@ static constexpr CGFloat const WINDOW_HEIGHT = 800;
     }
 }
 
+- (void)onLoadFinish:(URL const&)url
+{
+    [[self tabController] onLoadFinish:url];
+}
+
 - (void)onTitleChange:(DeprecatedString const&)title
 {
     [[self tabController] onTitleChange:title];
